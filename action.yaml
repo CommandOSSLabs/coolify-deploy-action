@@ -1,0 +1,96 @@
+name: Deploy to Coolify
+description: Create or update a Coolify Docker image application and trigger a deployment.
+branding:
+  icon: upload-cloud
+  color: green
+
+inputs:
+  coolify_domain:
+    description: |-
+      Coolify domain or base URL.
+
+      Use `app.coolify.io` for Coolify Cloud, or your self-hosted Coolify domain.
+      If the protocol is omitted, `https://` is used.
+      The action appends `/api/v1` automatically unless it is already present.
+    required: false
+    default: app.coolify.io
+  api_token:
+    description: Coolify API token.
+    required: true
+  docker_image:
+    description: |-
+      Docker registry image name to deploy.
+
+      This maps to Coolify's `docker_registry_image_name` field.
+    required: true
+  docker_image_tag:
+    description: |-
+      Optional Docker registry image tag.
+
+      This maps to Coolify's `docker_registry_image_tag` field.
+    required: false
+  environment_variables:
+    description: |-
+      Application environment variables.
+
+      Accepted formats:
+      - JSON object: `{"NODE_ENV":"production"}`
+      - JSON array: `[{"key":"NODE_ENV","value":"production"}]`
+      - dotenv lines: `NODE_ENV=production`
+    required: false
+  project_uuid:
+    description: Project UUID. Required when `app_uuid` is not provided.
+    required: false
+  server_uuid:
+    description: Server UUID. Required when `app_uuid` is not provided.
+    required: false
+  environment_name:
+    description: Environment name. Required for creation unless `environment_uuid` is provided.
+    required: false
+  environment_uuid:
+    description: Environment UUID. Required for creation unless `environment_name` is provided.
+    required: false
+  app_uuid:
+    description: |-
+      Existing Coolify application UUID.
+
+      If provided, the action updates this app and returns the same UUID.
+      If omitted, the action creates a new Docker-image application and returns the new UUID.
+    required: false
+  ports_exposes:
+    description: |-
+      Ports to expose for a newly created Docker-image application.
+
+      Required when `app_uuid` is not provided unless `optional_options` contains `ports_exposes`.
+    required: false
+  optional_options:
+    description: |-
+      JSON object merged into the Coolify create/update application request body.
+
+      Use this for Coolify fields such as `name`, `domains`, `destination_uuid`,
+      health checks, resource limits, deployment hooks, auth settings, or any other
+      request-body field supported by Coolify.
+    required: false
+  request_timeout_ms:
+    description: HTTP request timeout in milliseconds.
+    required: false
+    default: '30000'
+  request_retry_count:
+    description: |-
+      Number of times to retry timed-out or unknown transport errors.
+
+      HTTP response errors from Coolify are not retried.
+    required: false
+    default: '0'
+
+outputs:
+  app_uuid:
+    description: Coolify application UUID.
+  created:
+    description: Whether the action created a new application.
+  deployment_uuid:
+    description: Coolify deployment UUID when returned by the deploy API.
+
+runs:
+  using: node24
+  main: dist/index.mjs
