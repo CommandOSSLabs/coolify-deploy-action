@@ -1,4 +1,4 @@
-name: Deploy to Coolify
+name: Coolify Docker Image Deploy
 description: Create or update a Coolify Docker image application and trigger a deployment.
 branding:
   icon: upload-cloud

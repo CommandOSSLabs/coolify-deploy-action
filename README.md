@@ -1,4 +1,4 @@
-# coolify-deploy-action
+# Coolify Docker Image Deploy Action
 
 Create or update a Coolify Docker-image application, sync environment variables, and trigger a deployment.
 
