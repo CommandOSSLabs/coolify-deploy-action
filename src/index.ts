@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import { CoolifyClient } from './coolify-client.ts'
 import { readInputs } from './input.ts'
+import { writeActionSummary } from './summary.ts'
 import type { Inputs, JsonObject, JsonValue } from './types.ts'
 
 async function main(): Promise<void> {
@@ -50,6 +51,12 @@ async function main(): Promise<void> {
   if (deploymentUuid) {
     core.setOutput('deployment_uuid', deploymentUuid)
   }
+
+  await writeActionSummary(inputs, {
+    appUuid,
+    created,
+    deploymentUuid,
+  })
 }
 
 function buildCreateBody(inputs: Inputs): JsonObject {
