@@ -29,7 +29,7 @@ async function main(): Promise<void> {
   } else {
     core.info('Creating Coolify Docker Compose service.')
     const body = buildCreateBody(inputs)
-    const createdService = await client.createDockerComposeApplication(body)
+    const createdService = await client.createDockerComposeService(body)
     serviceUuid = extractServiceUuid(createdService)
     created = true
 
@@ -46,10 +46,12 @@ async function main(): Promise<void> {
   core.setOutput('service_uuid', serviceUuid)
   core.setOutput('created', String(created))
 
-  core.info(
-    `Syncing ${inputs.environmentVariables.length} environment variable(s).`
-  )
-  await client.updateServiceEnvs(serviceUuid, inputs.environmentVariables)
+  if (inputs.environmentVariables.length > 0) {
+    core.info(
+      `Syncing ${inputs.environmentVariables.length} environment variable(s).`
+    )
+    await client.updateServiceEnvs(serviceUuid, inputs.environmentVariables)
+  }
 
   core.info(`Restarting Coolify service '${serviceUuid}' to apply changes.`)
   await client.restartService(serviceUuid)

@@ -24,7 +24,7 @@ jobs:
           environment_name_or_uuid: ${{ vars.TEST_ENVIRONMENT_UUID }}
           service_options: |
             {
-              "name": "web",
+              "name": "act-test-service",
               "description": "Act test service"
             }
           environment_variables: |
@@ -50,7 +50,7 @@ jobs:
           service_uuid: ${{ needs.create.outputs.service_uuid }}
           service_options: |
             {
-              "name": "web",
+              "name": "act-test-service-updated",
               "description": "Updated via act",
               "urls": [
                 { "name": "web", "url": "https://example.test" }

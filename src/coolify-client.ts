@@ -28,8 +28,8 @@ export class CoolifyClient {
     })
   }
 
-  async createDockerComposeApplication(body: JsonObject): Promise<JsonValue> {
-    return this.request('POST', '/applications/dockercompose', body)
+  async createDockerComposeService(body: JsonObject): Promise<JsonValue> {
+    return this.request('POST', '/services', body)
   }
 
   async updateService(uuid: string, body: JsonObject): Promise<JsonValue> {
