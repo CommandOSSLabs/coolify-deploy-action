@@ -12,7 +12,8 @@
     "build": "tsdown --minify",
     "check": "biome check",
     "check:fix": "biome check --write",
-    "check:types": "tsc --noEmit"
+    "check:types": "tsc --noEmit",
+    "test:act": "act"
   },
   "dependencies": {
     "@actions/core": "^3.0.1",

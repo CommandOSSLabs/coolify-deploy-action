@@ -1,0 +1,5 @@
+--container-architecture linux/amd64
+--workflows test/act-test.yml
+--secret-file test/.secrets
+--var-file test/.env
+-P ubuntu-latest=catthehacker/ubuntu:act-24.04
