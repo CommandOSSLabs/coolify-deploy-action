@@ -21,33 +21,23 @@ export class CoolifyClient {
     })
   }
 
-  async createDockerImageApplication(body: JsonObject): Promise<JsonValue> {
-    return this.request('POST', '/applications/dockerimage', body)
+  async createDockerComposeApplication(body: JsonObject): Promise<JsonValue> {
+    return this.request('POST', '/applications/dockercompose', body)
   }
 
-  async updateApplication(uuid: string, body: JsonObject): Promise<JsonValue> {
-    return this.request(
-      'PATCH',
-      `/applications/${encodeURIComponent(uuid)}`,
-      body
-    )
+  async updateService(uuid: string, body: JsonObject): Promise<JsonValue> {
+    return this.request('PATCH', `/services/${encodeURIComponent(uuid)}`, body)
   }
 
-  async updateApplicationEnvs(
+  async updateServiceEnvs(
     uuid: string,
     envs: CoolifyEnvVar[]
   ): Promise<JsonValue> {
     return this.request(
       'PATCH',
-      `/applications/${encodeURIComponent(uuid)}/envs/bulk`,
+      `/services/${encodeURIComponent(uuid)}/envs/bulk`,
       { data: envs }
     )
-  }
-
-  async deployApplication(uuid: string): Promise<JsonValue> {
-    const query = new URLSearchParams({ uuid })
-
-    return this.request('GET', `/deploy?${query.toString()}`)
   }
 
   private async request(

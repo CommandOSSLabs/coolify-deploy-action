@@ -1,6 +1,6 @@
-# Coolify Docker Image Deploy Action
+# Coolify Docker Compose Deploy Action
 
-Create or update a Coolify Docker-image application, sync environment variables, and trigger a deployment.
+Create or update a Coolify Docker Compose service and sync environment variables.
 
 Works with Coolify Cloud and self-hosted Coolify instances.
 
@@ -10,15 +10,12 @@ Works with Coolify Cloud and self-hosted Coolify instances.
 | --- | --- | --- |
 | `coolify_domain` | `app.coolify.io` | Coolify domain or base URL. `https://` and `/api/v1` are added automatically when omitted. |
 | `api_token` | - | Coolify API token. |
-| `docker_image` | - | Docker registry image name. |
-| `docker_image_tag` | - | Docker registry image tag. |
-| `environment_variables` | - | JSON object, JSON array, or dotenv lines. |
-| `project_uuid` | - | Required when creating a new app. |
-| `server_uuid` | - | Required when creating a new app. |
-| `environment_name` | - | Required when creating a new app unless `environment_uuid` is provided. |
-| `environment_uuid` | - | Required when creating a new app unless `environment_name` is provided. |
-| `app_uuid` | - | Existing app UUID. If omitted, a new app is created. |
-| `ports_exposes` | - | Required when creating a new app unless supplied in `optional_options`. |
+| `docker_compose` | - | Docker Compose file content or path to a compose file. |
+| `environment_variables` | - | JSON array with `key`, `value`, and `is_secret` fields. |
+| `project_uuid` | - | Required when creating a new service. |
+| `server_uuid` | - | Required when creating a new service. |
+| `environment_name_or_uuid` | - | Required when creating a new service. |
+| `service_uuid` | - | Existing service UUID. If omitted, a new service is created. |
 | `optional_options` | - | JSON object merged into the Coolify create/update body. |
 | `request_timeout_ms` | `30000` | HTTP request timeout. |
 | `request_retry_count` | `0` | Retries for timed-out or unknown transport errors. Coolify HTTP response errors are not retried. |
@@ -27,77 +24,80 @@ Explicit top-level inputs override duplicate keys in `optional_options`.
 
 ## Outputs
 
-- `app_uuid`: Existing or newly created Coolify application UUID.
-- `created`: `true` when the action created a new app, otherwise `false`.
-- `deployment_uuid`: Deployment UUID when Coolify returns one.
+- `service_uuid`: Existing or newly created Coolify service UUID.
+- `created`: `true` when the action created a new service, otherwise `false`.
 
 ## Environment Variables
 
-As a JSON object:
-
-```yaml
-environment_variables: |
-  {
-    "NODE_ENV": "production",
-    "PUBLIC_URL": "https://example.com"
-  }
-```
-
-As a JSON array with Coolify flags:
+Accepted format — JSON array with `key`, `value`, and `is_secret`:
 
 ```yaml
 environment_variables: |
   [
-    { "key": "NODE_ENV", "value": "production" },
-    { "key": "API_URL", "value": "https://api.example.com", "is_buildtime": true }
+    { "key": "NODE_ENV", "value": "production", "is_secret": false },
+    { "key": "API_TOKEN", "value": "${{ secrets.API_TOKEN }}", "is_secret": true }
   ]
 ```
 
-As dotenv lines:
+Values marked with `is_secret: true` are masked in GitHub Actions logs.
+
+## Docker Compose Input
+
+Provide raw compose content:
 
 ```yaml
-environment_variables: |
-  NODE_ENV=production
-  PUBLIC_URL=https://example.com
+docker_compose: |
+  services:
+    web:
+      image: ghcr.io/acme/web:latest
+      ports:
+        - "3000:3000"
+```
+
+Or provide a file path:
+
+```yaml
+docker_compose: docker-compose.yml
 ```
 
 ## Examples
 
-Create a Docker-image app and deploy it:
+Create a Docker Compose service:
 
 ```yaml
 - name: Deploy to Coolify
   uses: CommandOSSLabs/coolify-deploy-action@v1
   with:
     api_token: ${{ secrets.COOLIFY_API_TOKEN }}
-    docker_image: ghcr.io/acme/web
-    docker_image_tag: ${{ github.sha }}
+    docker_compose: docker-compose.yml
     project_uuid: ${{ secrets.COOLIFY_PROJECT_UUID }}
     server_uuid: ${{ secrets.COOLIFY_SERVER_UUID }}
-    environment_name: production
-    ports_exposes: '3000'
+    environment_name_or_uuid: production
     environment_variables: |
-      NODE_ENV=production
-      COMMIT_SHA=${{ github.sha }}
+      [
+        { "key": "NODE_ENV", "value": "production", "is_secret": false },
+        { "key": "COMMIT_SHA", "value": "${{ github.sha }}", "is_secret": false }
+      ]
     optional_options: |
       {
         "name": "web",
-        "domains": "https://web.example.com",
-        "health_check_enabled": true,
-        "health_check_path": "/health"
+        "instant_deploy": true
       }
 ```
 
-Update an existing app:
+Update an existing service:
 
 ```yaml
-- name: Deploy to existing Coolify app
+- name: Deploy to existing Coolify service
   uses: CommandOSSLabs/coolify-deploy-action@v1
   with:
     api_token: ${{ secrets.COOLIFY_API_TOKEN }}
-    app_uuid: ${{ secrets.COOLIFY_APP_UUID }}
-    docker_image: ghcr.io/acme/web
-    docker_image_tag: ${{ github.sha }}
+    service_uuid: ${{ secrets.COOLIFY_SERVICE_UUID }}
+    docker_compose: docker-compose.yml
+    environment_variables: |
+      [
+        { "key": "COMMIT_SHA", "value": "${{ github.sha }}", "is_secret": false }
+      ]
 ```
 
 ## License

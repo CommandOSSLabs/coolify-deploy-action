@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import { CoolifyClient } from './coolify-client.ts'
 import { readInputs } from './input.ts'
 import { buildCreateBody, buildUpdateBody } from './payload.ts'
-import { extractAppUuid, extractDeploymentUuid } from './response.ts'
+import { extractServiceUuid } from './response.ts'
 import { writeActionSummary } from './summary.ts'
 
 async function main(): Promise<void> {
@@ -14,49 +14,36 @@ async function main(): Promise<void> {
     inputs.requestRetryCount
   )
 
-  let appUuid = inputs.appUuid
+  let serviceUuid = inputs.serviceUuid
   let created = false
 
-  if (appUuid) {
-    core.info(`Updating Coolify application '${appUuid}'.`)
-    await client.updateApplication(appUuid, buildUpdateBody(inputs))
+  if (serviceUuid) {
+    core.info(`Updating Coolify service '${serviceUuid}'.`)
+    await client.updateService(serviceUuid, buildUpdateBody(inputs))
   } else {
-    core.info('Creating Coolify Docker image application.')
-    const createdApplication = await client.createDockerImageApplication(
+    core.info('Creating Coolify Docker Compose service.')
+    const createdService = await client.createDockerComposeApplication(
       buildCreateBody(inputs)
     )
-    appUuid = extractAppUuid(createdApplication)
+    serviceUuid = extractServiceUuid(createdService)
     created = true
 
-    if (!appUuid) {
-      throw new Error(
-        'Coolify did not return an application UUID after creation.'
-      )
+    if (!serviceUuid) {
+      throw new Error('Coolify did not return a service UUID after creation.')
     }
   }
 
-  core.setOutput('app_uuid', appUuid)
+  core.setOutput('service_uuid', serviceUuid)
   core.setOutput('created', String(created))
 
-  if (inputs.environmentVariables.length > 0) {
-    core.info(
-      `Syncing ${inputs.environmentVariables.length} environment variable(s).`
-    )
-    await client.updateApplicationEnvs(appUuid, inputs.environmentVariables)
-  }
-
-  core.info(`Triggering Coolify deployment for '${appUuid}'.`)
-  const deployment = await client.deployApplication(appUuid)
-  const deploymentUuid = extractDeploymentUuid(deployment)
-
-  if (deploymentUuid) {
-    core.setOutput('deployment_uuid', deploymentUuid)
-  }
+  core.info(
+    `Syncing ${inputs.environmentVariables.length} environment variable(s).`
+  )
+  await client.updateServiceEnvs(serviceUuid, inputs.environmentVariables)
 
   await writeActionSummary(inputs, {
-    appUuid,
+    serviceUuid,
     created,
-    deploymentUuid,
   })
 }
 

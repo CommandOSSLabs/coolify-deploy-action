@@ -1,3 +1,4 @@
+import { encodeDockerComposeRaw } from './docker-compose.ts'
 import type { Inputs, JsonObject, JsonValue } from './types.ts'
 
 export function buildCreateBody(inputs: Inputs): JsonObject {
@@ -5,21 +6,34 @@ export function buildCreateBody(inputs: Inputs): JsonObject {
     ...inputs.optionalOptions,
     project_uuid: inputs.projectUuid,
     server_uuid: inputs.serverUuid,
-    environment_name: inputs.environmentName,
-    environment_uuid: inputs.environmentUuid,
-    docker_registry_image_name: inputs.dockerImage,
-    docker_registry_image_tag: inputs.dockerImageTag,
-    ports_exposes: inputs.portsExposes ?? inputs.optionalOptions.ports_exposes,
+    ...resolveEnvironmentFields(inputs.environmentNameOrUuid),
+    docker_compose_raw: encodeDockerComposeRaw(inputs.dockerCompose),
   })
 }
 
 export function buildUpdateBody(inputs: Inputs): JsonObject {
   return removeUndefined({
     ...inputs.optionalOptions,
-    docker_registry_image_name: inputs.dockerImage,
-    docker_registry_image_tag: inputs.dockerImageTag,
-    ports_exposes: inputs.portsExposes,
+    docker_compose_raw: encodeDockerComposeRaw(inputs.dockerCompose),
   })
+}
+
+function resolveEnvironmentFields(
+  environmentNameOrUuid: string | undefined
+): JsonObject {
+  if (!environmentNameOrUuid) {
+    return {}
+  }
+
+  if (isCoolifyUuid(environmentNameOrUuid)) {
+    return { environment_uuid: environmentNameOrUuid }
+  }
+
+  return { environment_name: environmentNameOrUuid }
+}
+
+function isCoolifyUuid(value: string): boolean {
+  return /^[a-z0-9]{20,}$/.test(value)
 }
 
 function removeUndefined(record: Record<string, unknown>): JsonObject {

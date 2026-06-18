@@ -1,28 +1,17 @@
 import type { JsonObject, JsonValue } from './types.ts'
 
-export function extractAppUuid(value: JsonValue): string | undefined {
+export function extractServiceUuid(value: JsonValue): string | undefined {
   const object = asObject(value)
   const directUuid =
-    stringField(object, 'uuid') ?? stringField(object, 'app_uuid')
+    stringField(object, 'uuid') ?? stringField(object, 'service_uuid')
   if (directUuid) {
     return directUuid
   }
 
   return (
     stringField(asObject(object?.data), 'uuid') ??
-    stringField(asObject(object?.application), 'uuid')
+    stringField(asObject(object?.service), 'uuid')
   )
-}
-
-export function extractDeploymentUuid(value: JsonValue): string | undefined {
-  const object = asObject(value)
-  const directUuid =
-    stringField(object, 'deployment_uuid') ?? stringField(object, 'uuid')
-  if (directUuid) {
-    return directUuid
-  }
-
-  return stringField(asObject(object?.data), 'deployment_uuid')
 }
 
 function asObject(value: JsonValue | undefined): JsonObject | undefined {

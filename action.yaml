@@ -1,5 +1,5 @@
-name: Coolify Docker Image Deploy
-description: Create or update a Coolify Docker image application and trigger a deployment.
+name: Coolify Docker Compose Deploy
+description: Create or update a Coolify Docker Compose service and sync environment variables.
 branding:
   icon: upload-cloud
   color: green
@@ -17,58 +17,41 @@ inputs:
   api_token:
     description: Coolify API token.
     required: true
-  docker_image:
+  docker_compose:
     description: |-
-      Docker registry image name to deploy.
+      Docker Compose file content or path to a compose file.
 
-      This maps to Coolify's `docker_registry_image_name` field.
+      If the value matches an existing file path, the file is read automatically.
+      Otherwise, the value is treated as raw Docker Compose content.
     required: true
-  docker_image_tag:
-    description: |-
-      Optional Docker registry image tag.
-
-      This maps to Coolify's `docker_registry_image_tag` field.
-    required: false
   environment_variables:
     description: |-
-      Application environment variables.
+      Service environment variables as a JSON array.
 
-      Accepted formats:
-      - JSON object: `{"NODE_ENV":"production"}`
-      - JSON array: `[{"key":"NODE_ENV","value":"production"}]`
-      - dotenv lines: `NODE_ENV=production`
+      Each entry must include `key`, `value`, and `is_secret`.
     required: false
   project_uuid:
-    description: Project UUID. Required when `app_uuid` is not provided.
+    description: Project UUID. Required when `service_uuid` is not provided.
     required: false
   server_uuid:
-    description: Server UUID. Required when `app_uuid` is not provided.
+    description: Server UUID. Required when `service_uuid` is not provided.
     required: false
-  environment_name:
-    description: Environment name. Required for creation unless `environment_uuid` is provided.
+  environment_name_or_uuid:
+    description: Environment name or UUID. Required when `service_uuid` is not provided.
     required: false
-  environment_uuid:
-    description: Environment UUID. Required for creation unless `environment_name` is provided.
-    required: false
-  app_uuid:
+  service_uuid:
     description: |-
-      Existing Coolify application UUID.
+      Existing Coolify service UUID.
 
-      If provided, the action updates this app and returns the same UUID.
-      If omitted, the action creates a new Docker-image application and returns the new UUID.
-    required: false
-  ports_exposes:
-    description: |-
-      Ports to expose for a newly created Docker-image application.
-
-      Required when `app_uuid` is not provided unless `optional_options` contains `ports_exposes`.
+      If provided, the action updates this service and returns the same UUID.
+      If omitted, the action creates a new Docker Compose service and returns the new UUID.
     required: false
   optional_options:
     description: |-
-      JSON object merged into the Coolify create/update application request body.
+      JSON object merged into the Coolify create/update service request body.
 
-      Use this for Coolify fields such as `name`, `domains`, `destination_uuid`,
-      health checks, resource limits, deployment hooks, auth settings, or any other
+      Use this for Coolify fields such as `name`, `description`, `destination_uuid`,
+      `instant_deploy`, `urls`, `connect_to_docker_network`, or any other
       request-body field supported by Coolify.
     required: false
   request_timeout_ms:
@@ -84,12 +67,10 @@ inputs:
     default: '0'
 
 outputs:
-  app_uuid:
-    description: Coolify application UUID.
+  service_uuid:
+    description: Coolify service UUID.
   created:
-    description: Whether the action created a new application.
-  deployment_uuid:
-    description: Coolify deployment UUID when returned by the deploy API.
+    description: Whether the action created a new service.
 
 runs:
   using: node24

@@ -10,25 +10,18 @@ export type JsonObject = { [key: string]: JsonValue }
 export type CoolifyEnvVar = {
   key: string
   value: string
-  is_buildtime?: boolean
-  is_runtime?: boolean
-  is_preview?: boolean
-  is_literal?: boolean
-  is_multiline?: boolean
+  is_secret: boolean
 }
 
 export type Inputs = {
   coolifyDomain: string
   apiToken: string
-  dockerImage: string
-  dockerImageTag?: string
+  dockerCompose: string
   environmentVariables: CoolifyEnvVar[]
   projectUuid?: string
   serverUuid?: string
-  environmentName?: string
-  environmentUuid?: string
-  appUuid?: string
-  portsExposes?: string
+  environmentNameOrUuid?: string
+  serviceUuid?: string
   optionalOptions: JsonObject
   requestTimeoutMs: number
   requestRetryCount: number
