@@ -7,6 +7,7 @@ export function buildCreateBody(inputs: Inputs): JsonObject {
     server_uuid: inputs.serverUuid,
     ...resolveEnvironmentFields(inputs.environmentNameOrUuid),
     docker_compose_raw: encodeDockerComposeRaw(inputs.dockerCompose),
+    instant_deploy: true,
   })
 }
 
