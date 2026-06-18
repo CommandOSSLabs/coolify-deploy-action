@@ -1,14 +1,10 @@
 import * as core from '@actions/core'
-import { type ZodError, type ZodIssue, z } from 'zod'
+import { type ZodIssue, z } from 'zod'
 import { resolveDockerComposeContent } from './docker-compose.ts'
+import { InputValidationError } from './errors.ts'
 import type { CoolifyEnvVar, Inputs, JsonObject, JsonValue } from './types.ts'
 
-export class InputValidationError extends Error {
-  constructor(error: ZodError) {
-    super(formatInputValidationError(error))
-    this.name = 'InputValidationError'
-  }
-}
+export { InputValidationError } from './errors.ts'
 
 const JsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
   z.union([
@@ -258,33 +254,10 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
 
-function formatInputValidationError(error: ZodError): string {
-  return `Input validation failed:\n${error.issues
-    .map((issue) => `- ${formatInputIssue(issue)}`)
-    .join('\n')}`
-}
-
-function formatInputIssue(issue: ZodIssue): string {
-  return `${formatInputPath(issue.path)}: ${issue.message}`
-}
-
 function formatZodIssues(issues: ZodIssue[]): string {
   return issues
     .map((issue) => `${formatNestedPath(issue.path)}: ${issue.message}`)
     .join('; ')
-}
-
-function formatInputPath(path: ZodIssue['path']): string {
-  if (path.length === 0) {
-    return 'inputs'
-  }
-
-  const [inputName, ...nestedPath] = path
-  const suffix = formatNestedPath(nestedPath)
-
-  return suffix === 'value'
-    ? `input '${String(inputName)}'`
-    : `input '${String(inputName)}' ${suffix}`
 }
 
 function formatNestedPath(path: ZodIssue['path']): string {

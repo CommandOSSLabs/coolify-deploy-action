@@ -1,4 +1,11 @@
 import axios, { type AxiosError, type AxiosInstance, type Method } from 'axios'
+import {
+  CoolifyHttpError,
+  CoolifyRetryableError,
+  CoolifyTimeoutError,
+  CoolifyUnknownRequestError,
+  InvalidCoolifyDomainError,
+} from './errors.ts'
 import type { CoolifyEnvVar, JsonObject, JsonValue } from './types.ts'
 
 export class CoolifyClient {
@@ -106,14 +113,6 @@ export class CoolifyClient {
   }
 }
 
-class CoolifyHttpError extends Error {}
-
-class CoolifyRetryableError extends Error {}
-
-class CoolifyTimeoutError extends CoolifyRetryableError {}
-
-class CoolifyUnknownRequestError extends CoolifyRetryableError {}
-
 function isAxiosTimeoutError(error: AxiosError): boolean {
   return (
     error.code === 'ECONNABORTED' ||
@@ -125,7 +124,7 @@ function isAxiosTimeoutError(error: AxiosError): boolean {
 function normalizeApiBaseUrl(coolifyDomain: string): string {
   const trimmed = coolifyDomain.trim().replace(/\/+$/, '')
   if (trimmed.length === 0) {
-    throw new Error("Input 'coolify_domain' cannot be empty.")
+    throw new InvalidCoolifyDomainError()
   }
 
   const baseUrl = /^https?:\/\//.test(trimmed) ? trimmed : `https://${trimmed}`

@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import { CoolifyClient } from './coolify-client.ts'
+import { ServiceUuidNotReturnedError } from './errors.ts'
 import { readInputs } from './input.ts'
 import { buildCreateBody, buildUpdateBody } from './payload.ts'
 import { extractServiceUuid } from './response.ts'
@@ -28,9 +29,7 @@ async function main(): Promise<void> {
     serviceUuid = extractServiceUuid(createdService)
     created = true
 
-    if (!serviceUuid) {
-      throw new Error('Coolify did not return a service UUID after creation.')
-    }
+    if (!serviceUuid) throw new ServiceUuidNotReturnedError()
   }
 
   core.setOutput('service_uuid', serviceUuid)

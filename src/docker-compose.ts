@@ -1,10 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { isAbsolute, resolve } from 'node:path'
+import { EmptyDockerComposeError } from './errors.ts'
 
 export function resolveDockerComposeContent(raw: string): string {
   const trimmed = raw.trim()
   if (trimmed.length === 0) {
-    throw new Error('must not be empty')
+    throw new EmptyDockerComposeError()
   }
 
   const candidatePaths = [trimmed]
