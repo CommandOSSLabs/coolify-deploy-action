@@ -3,7 +3,6 @@ import type { Inputs, JsonObject, JsonValue } from './types.ts'
 
 export function buildCreateBody(inputs: Inputs): JsonObject {
   return removeUndefined({
-    ...inputs.optionalOptions,
     project_uuid: inputs.projectUuid,
     server_uuid: inputs.serverUuid,
     ...resolveEnvironmentFields(inputs.environmentNameOrUuid),
@@ -13,8 +12,24 @@ export function buildCreateBody(inputs: Inputs): JsonObject {
 
 export function buildUpdateBody(inputs: Inputs): JsonObject {
   return removeUndefined({
-    ...inputs.optionalOptions,
+    ...buildPlacementFields(inputs),
+    ...inputs.serviceOptions,
     docker_compose_raw: encodeDockerComposeRaw(inputs.dockerCompose),
+  })
+}
+
+export function buildServiceOptionsBody(inputs: Inputs): JsonObject {
+  return removeUndefined({
+    ...buildPlacementFields(inputs),
+    ...inputs.serviceOptions,
+  })
+}
+
+function buildPlacementFields(inputs: Inputs): JsonObject {
+  return removeUndefined({
+    project_uuid: inputs.projectUuid,
+    server_uuid: inputs.serverUuid,
+    ...resolveEnvironmentFields(inputs.environmentNameOrUuid),
   })
 }
 

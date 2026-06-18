@@ -46,13 +46,15 @@ inputs:
       If provided, the action updates this service and returns the same UUID.
       If omitted, the action creates a new Docker Compose service and returns the new UUID.
     required: false
-  optional_options:
+  service_options:
     description: |-
-      JSON object merged into the Coolify create/update service request body.
+      JSON object sent to PATCH /services/{uuid}.
 
-      Use this for Coolify fields such as `name`, `description`, `destination_uuid`,
-      `instant_deploy`, `urls`, `connect_to_docker_network`, or any other
-      request-body field supported by Coolify.
+      Supported fields: `name`, `description`, `urls`.
+      Other fields are ignored with a warning.
+
+      These options are not sent when creating a new service; they are applied
+      via a separate update call after creation.
     required: false
   request_timeout_ms:
     description: HTTP request timeout in milliseconds.

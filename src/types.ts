@@ -1,3 +1,5 @@
+import type { UpdateServiceOptions } from './update-service-options.ts'
+
 export type JsonPrimitive = string | number | boolean | null
 
 export type JsonValue =
@@ -22,7 +24,7 @@ export type Inputs = {
   serverUuid?: string
   environmentNameOrUuid?: string
   serviceUuid?: string
-  optionalOptions: JsonObject
+  serviceOptions?: UpdateServiceOptions
   requestTimeoutMs: number
   requestRetryCount: number
 }

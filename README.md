@@ -16,11 +16,9 @@ Works with Coolify Cloud and self-hosted Coolify instances.
 | `server_uuid` | - | Required when creating a new service. |
 | `environment_name_or_uuid` | - | Required when creating a new service. |
 | `service_uuid` | - | Existing service UUID. If omitted, a new service is created. |
-| `optional_options` | - | JSON object merged into the Coolify create/update body. |
+| `service_options` | - | JSON object with `name`, `description`, and/or `urls`. Other fields are ignored with a warning. Not used during service creation. |
 | `request_timeout_ms` | `30000` | HTTP request timeout. |
 | `request_retry_count` | `0` | Retries for timed-out or unknown transport errors. Coolify HTTP response errors are not retried. |
-
-Explicit top-level inputs override duplicate keys in `optional_options`.
 
 ## Outputs
 
@@ -78,10 +76,10 @@ Create a Docker Compose service:
         { "key": "NODE_ENV", "value": "production", "is_secret": false },
         { "key": "COMMIT_SHA", "value": "${{ github.sha }}", "is_secret": false }
       ]
-    optional_options: |
+    service_options: |
       {
         "name": "web",
-        "instant_deploy": true
+        "description": "Production web service"
       }
 ```
 

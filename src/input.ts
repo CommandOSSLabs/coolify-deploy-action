@@ -2,22 +2,10 @@ import * as core from '@actions/core'
 import { type ZodIssue, z } from 'zod'
 import { resolveDockerComposeContent } from './docker-compose.ts'
 import { InputValidationError } from './errors.ts'
-import type { CoolifyEnvVar, Inputs, JsonObject, JsonValue } from './types.ts'
+import type { CoolifyEnvVar, Inputs } from './types.ts'
+import { parseUpdateServiceOptionsInput } from './update-service-options.ts'
 
 export { InputValidationError } from './errors.ts'
-
-const JsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
-  z.union([
-    z.string(),
-    z.number(),
-    z.boolean(),
-    z.null(),
-    z.array(JsonValueSchema),
-    z.record(z.string(), JsonValueSchema),
-  ])
-)
-
-const JsonObjectSchema = z.record(z.string(), JsonValueSchema)
 
 const RequiredTextInputSchema = z
   .string({ error: 'is required' })
@@ -65,10 +53,12 @@ const ActionInputsSchema = z
     server_uuid: OptionalTextInputSchema,
     environment_name_or_uuid: OptionalTextInputSchema,
     service_uuid: OptionalTextInputSchema,
-    optional_options: z
+    service_options: z
       .string()
       .optional()
-      .transform((raw, ctx) => parseJsonObjectInput(raw, ctx)),
+      .transform((raw, ctx) =>
+        parseUpdateServiceOptionsInput(raw, ctx, formatZodIssues)
+      ),
     request_timeout_ms: integerInputSchema({
       defaultValue: 30_000,
       minimum: 1,
@@ -119,7 +109,7 @@ const ActionInputsSchema = z
       serverUuid: inputs.server_uuid,
       environmentNameOrUuid: inputs.environment_name_or_uuid,
       serviceUuid: inputs.service_uuid,
-      optionalOptions: inputs.optional_options,
+      serviceOptions: inputs.service_options,
       requestTimeoutMs: inputs.request_timeout_ms,
       requestRetryCount: inputs.request_retry_count,
     })
@@ -136,7 +126,7 @@ const RAW_INPUT_NAMES: RawInputName[] = [
   'server_uuid',
   'environment_name_or_uuid',
   'service_uuid',
-  'optional_options',
+  'service_options',
   'request_timeout_ms',
   'request_retry_count',
 ]
@@ -186,37 +176,6 @@ function integerInputSchema(options: {
 
       return value
     })
-}
-
-function parseJsonObjectInput(
-  raw: string | undefined,
-  ctx: z.RefinementCtx
-): JsonObject {
-  if (!raw) {
-    return {}
-  }
-
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(raw)
-  } catch (error) {
-    ctx.addIssue({
-      code: 'custom',
-      message: `must be a valid JSON object: ${getErrorMessage(error)}`,
-    })
-    return z.NEVER
-  }
-
-  const result = JsonObjectSchema.safeParse(parsed)
-  if (!result.success) {
-    ctx.addIssue({
-      code: 'custom',
-      message: `must be a JSON object: ${formatZodIssues(result.error.issues)}`,
-    })
-    return z.NEVER
-  }
-
-  return result.data
 }
 
 function parseEnvironmentVariablesInput(
