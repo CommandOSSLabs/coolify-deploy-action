@@ -28,6 +28,7 @@ export async function writeActionSummary(
             'Environment variables',
             `${inputs.environmentVariables.length} synced`,
           ],
+          ['Restart', 'Requested'],
           ['Retries configured', String(inputs.requestRetryCount)],
         ].map((row) =>
           row.map((cell) =>

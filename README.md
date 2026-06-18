@@ -1,6 +1,6 @@
 # Coolify Docker Compose Deploy Action
 
-Create or update a Coolify Docker Compose service and sync environment variables.
+Create or update a Coolify Docker Compose service, sync environment variables, and restart the service to apply changes.
 
 Works with Coolify Cloud and self-hosted Coolify instances.
 

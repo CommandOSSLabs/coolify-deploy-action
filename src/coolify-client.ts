@@ -40,6 +40,10 @@ export class CoolifyClient {
     )
   }
 
+  async restartService(uuid: string): Promise<JsonValue> {
+    return this.request('POST', `/services/${encodeURIComponent(uuid)}/restart`)
+  }
+
   private async request(
     method: Method,
     url: string,

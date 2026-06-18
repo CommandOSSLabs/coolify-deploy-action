@@ -1,5 +1,5 @@
 name: Coolify Docker Compose Deploy
-description: Create or update a Coolify Docker Compose service and sync environment variables.
+description: Create or update a Coolify Docker Compose service, sync environment variables, and restart the service.
 branding:
   icon: upload-cloud
   color: green

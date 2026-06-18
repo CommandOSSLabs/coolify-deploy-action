@@ -19,12 +19,12 @@ async function main(): Promise<void> {
 
   if (serviceUuid) {
     core.info(`Updating Coolify service '${serviceUuid}'.`)
-    await client.updateService(serviceUuid, buildUpdateBody(inputs))
+    const body = buildUpdateBody(inputs)
+    await client.updateService(serviceUuid, body)
   } else {
     core.info('Creating Coolify Docker Compose service.')
-    const createdService = await client.createDockerComposeApplication(
-      buildCreateBody(inputs)
-    )
+    const body = buildCreateBody(inputs)
+    const createdService = await client.createDockerComposeApplication(body)
     serviceUuid = extractServiceUuid(createdService)
     created = true
 
@@ -41,10 +41,10 @@ async function main(): Promise<void> {
   )
   await client.updateServiceEnvs(serviceUuid, inputs.environmentVariables)
 
-  await writeActionSummary(inputs, {
-    serviceUuid,
-    created,
-  })
+  core.info(`Restarting Coolify service '${serviceUuid}' to apply changes.`)
+  await client.restartService(serviceUuid)
+
+  await writeActionSummary(inputs, { serviceUuid, created })
 }
 
 try {
